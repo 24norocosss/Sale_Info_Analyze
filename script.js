@@ -21,70 +21,60 @@ function saveData() {
 }
 
 function renderAll() {
-    // 1. 메인 카드 영역 비우기
     container.innerHTML = '';
     
-    // 2. 카드 렌더링 (해외/국내 분기)
     saleData.forEach((data, index) => {
         const card = document.createElement('div');
-        card.className = `sale-card ${data.top_deals ? 'overseas-mode' : ''}`;
         
-        const defaultLogo = 'https://cdn-icons-png.flaticon.com/512/1162/1162456.png';
-        const logoUrl = data.logo || defaultLogo;
+        // [핵심] top_deals에 데이터가 있으면 무조건 해외 모드 그리드 가동
+        const hasTopDeals = data.top_deals && Array.isArray(data.top_deals) && data.top_deals.length > 0;
+        card.className = `sale-card ${hasTopDeals ? 'overseas-mode' : ''}`;
+        
+        const logoUrl = data.logo || 'https://cdn-icons-png.flaticon.com/512/1162/1162456.png';
 
-        if (data.top_deals && data.top_deals.length > 0) {
-            // [해외 모드 HTML]
+        if (hasTopDeals) {
+            // 🎬 해외 브랜드 전용: 2열 그리드 포맷
             card.innerHTML = `
-                <div class="overseas-inner">
-                    <div class="logo-box">
-                        <img src="${logoUrl}" class="logo-img" onerror="this.src='${defaultLogo}'">
-                    </div>
-                    <div class="product-grid">
-                        ${data.top_deals.slice(0, 2).map(item => `
-                            <div class="product-item">
-                                ${item.discount > 0 ? `<span class="discount-badge">${item.discount}%</span>` : ''}
-                                
-                                <div class="thumb-container" style="width: 100%; aspect-ratio: 1/1; background: #f4f4f4; border-radius: 8px; display: flex; align-items: center; justify-content: center; overflow: hidden;">
-                                    <img src="${item.imageUrl}" 
-                                        class="product-thumb" 
-                                        style="width: 100%; height: 100%; object-fit: contain;"
-                                        onerror="this.onerror=null; this.style.display='none'; this.parentElement.innerHTML='<div style=\'color:#bbb; font-size:11px; font-weight:bold; line-height:1.2;\'>${item.brand}<br>NO IMAGE</div>';">
+                <div class="overseas-inner" style="width:100%; display:flex; flex-direction:column; align-items:center;">
+                    <div class="logo-box"><img src="${logoUrl}" class="logo-img"></div>
+                    
+                    <h1 class="main-title" style="margin-bottom: 20px; font-weight:900;">${data.title}</h1>
+                    
+                    <div class="product-grid" style="display: flex; gap: 15px; width: 100%; justify-content: center; margin-bottom: 25px; padding: 0 15px;">
+                        ${data.top_deals.map(item => `
+                            <div class="product-item" style="flex: 1; background: #fff; padding: 12px; border-radius: 12px; position: relative; box-shadow: 0 4px 10px rgba(0,0,0,0.03);">
+                                <div class="thumb-container" style="width: 100%; aspect-ratio: 1/1; background: #f4f4f4; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-bottom: 10px;">
+                                    <span style="font-size: 10px; color: #bbb; font-weight: 800; letter-spacing:1px;">${item.brand.toUpperCase()}</span>
                                 </div>
-                                
-                                <div class="product-name" style="font-size: 0.75rem; color: #666; margin: 8px 0 4px 0; height: 2.4em; overflow: hidden; line-height: 1.2; width: 100%;">
-                                    ${item.name}
-                                </div>
-
-                                <div class="price-box">
-                                    <span class="sale-price" style="font-size: 0.9rem; font-weight: 800; color:#000;">${item.salePrice}</span>
-                                    <span class="original-price" style="font-size: 0.75rem; color: #ddd; text-decoration: line-through; display:block;">${item.originalPrice}</span>
+                                <div class="product-name" style="font-size: 11px; color: #444; height: 2.4em; overflow: hidden; line-height:1.2; margin-bottom: 8px; font-weight:500;">${item.name}</div>
+                                <div class="price-box" style="text-align:center;">
+                                    <div style="display:flex; align-items:center; justify-content:center; gap:4px;">
+                                        <span class="sale-price" style="font-weight: 900; font-size: 14px; color:#000;">${item.salePrice}</span>
+                                        <span class="discount-badge" style="background: #ff4d4d; color: #fff; padding: 2px 5px; border-radius: 4px; font-size: 10px; font-weight:800;">${item.discount}%</span>
+                                    </div>
+                                    <div class="original-price" style="font-size: 11px; color: #ccc; text-decoration: line-through; margin-top:2px;">${item.originalPrice}</div>
                                 </div>
                             </div>
                         `).join('')}
                     </div>
+
                     <div class="benefits-container">
                         ${(data.benefits || []).map(b => `<span class="benefit-tag">${b}</span>`).join('')}
                     </div>
-                    <p class="period-text">${data.duration || '재고 소진 시까지'}</p>
+                    <p class="period-text" style="margin-top:15px; font-size:12px; color:#999;">${data.duration}</p>
                 </div>
             `;
         } else {
-            // [국내 모드 HTML]
+            // 🇰🇷 국내 기획전 전용: 단순 포맷
             card.innerHTML = `
-                <div class="logo-box">
-                    <img src="${logoUrl}" class="logo-img" onerror="this.src='${defaultLogo}'">
+                <div class="logo-box"><img src="${logoUrl}" class="logo-img"></div>
+                <h1 class="main-title">${data.title}</h1>
+                <div class="benefits-container">
+                    ${(data.benefits || []).map(b => `<span class="benefit-tag">${b}</span>`).join('')}
                 </div>
-                <div class="sale-info">
-                    <h1 class="main-title" ondblclick="makeEditable(this, ${index}, 'title')">${data.title || data.info || '제목 없음'}</h1>
-                    <div class="benefits-container">
-                        ${(data.benefits || []).map((b, bi) => `<span class="benefit-tag" ondblclick="makeEditable(this, ${index}, 'benefits', ${bi})">${b}</span>`).join('')}
-                    </div>
-                    <p class="period-text" ondblclick="makeEditable(this, ${index}, 'duration')">${data.duration || data.period || '기간 정보 없음'}</p>
-                </div>
+                <p class="period-text">${data.duration}</p>
             `;
         }
-        
-        card.style.transform = `translateX(${(index - currentIndex) * 100}%)`;
         container.appendChild(card);
     });
 
@@ -102,51 +92,29 @@ function renderAll() {
 
 // 3. 플랫폼 추가/삭제 기능
 window.addPlatform = async function() {
-    // 1. 국내/해외 선택
-    const mode = prompt("어떤 사이트를 분석할까요? (국내/해외 중 입력)");
-    if (!mode) return;
+    const modeInput = prompt("국내 또는 해외를 입력하세요:");
+    if (!modeInput) return;
 
-    let url = "";
-    let targetBrand = "";
-
-    if (mode === "국내") {
-        url = prompt("기획전 링크를 입력하세요:");
-    } else if (mode === "해외") {
-        url = prompt("분석할 해외 사이트 세일 페이지 링크:");
-        targetBrand = prompt("찾고 싶은 브랜드명은 무엇인가요? (브랜드 명 정확히 입력)");
-    } else {
-        alert("잘못된 선택입니다.");
-        return;
-    }
-
+    const apiMode = (modeInput === "해외" || modeInput === "oss") ? "overseas" : "domestic";
+    const url = prompt("분석할 사이트 URL을 입력하세요:");
     if (!url) return;
-
-    console.log(`${targetBrand || '기획전'} 분석 시작...`);
 
     try {
         const response = await fetch('http://localhost:3000/scrape', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                url, 
-                targetBrand, // 해외 모드일 때만 데이터가 담김
-                mode: mode === "1" ? "domestic" : "overseas" 
-            })
+            body: JSON.stringify({ url, mode: apiMode }) // targetBrand 제거
         });
 
-        if (!response.ok) throw new Error("서버 응답 에러");
-        const autoData = await response.json();
-        
-        saleData.push(autoData);
+        const data = await response.json();
+        saleData.push(data);
         saveData();
         renderAll();
-        alert("분석 완료!");
+        alert("분석 완료! 카드가 추가되었습니다.");
     } catch (err) {
-        console.error("에러 발생:", err);
-        alert("분석에 실패했습니다.");
+        alert("분석 실패! 다시 시도해주세요.");
     }
 };
-
 window.deletePlatform = function(index) {
     if (confirm(`${saleData[index].platform} 정보를 삭제할까요?`)) {
         saleData.splice(index, 1);
