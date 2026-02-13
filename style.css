@@ -1,351 +1,229 @@
+/* style.css 전체 덮어쓰기 */
+
 :root {
-    --bg-color: #fcfaf7; /* 눈이 편한 오프화이트 */
+    --bg-color: #fcfaf7;
     --accent-color: #222;
     --phone-width: 450px; 
     --phone-height: 800px;
 }
 
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-    font-family: 'Pretendard', -apple-system, sans-serif;
-}
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Pretendard', sans-serif; }
 
-body {
-    background-color: #222; /* 촬영 시 구분을 위해 외부 배경은 어둡게 */
+body { background-color: #222; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
+.phone-wrapper { width: var(--phone-width); height: var(--phone-height); background-color: var(--bg-color); position: relative; overflow: hidden; }
+#card-container { width: 100%; height: 100%; position: relative; cursor: grab; }
+#card-container:active { cursor: grabbing; }
+
+.sale-card { position: absolute; width: 100%; height: 100%; padding: 60px 20px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; background-color: var(--bg-color); will-change: transform; user-select: none; }
+.sale-card.overseas-mode { padding: 0; justify-content: center; }
+
+/* 로고 및 타이틀 */
+.logo-box { width: 100%; height: 80px; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; }
+.logo-img { height: 100%; width: auto; object-fit: contain; }
+.main-title { font-size: 2rem; font-weight: 800; margin-bottom: 15px; color: #000; cursor: pointer; word-break: keep-all; line-height: 1.3; }
+
+/* 혜택 및 기간 */
+.benefits-container { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 15px 0; }
+.benefit-tag { background-color: #f0f0f0; color: #333; padding: 6px 12px; border-radius: 20px; font-size: 0.9rem; font-weight: 600; border: 1px solid #ddd; cursor: pointer; }
+.period-text { font-size: 1rem; color: #999; margin-top: 15px; cursor: pointer; }
+
+/* 해외 모드 전용 */
+.overseas-inner { width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0 20px; }
+.product-grid { display: flex; justify-content: center; gap: 15px; width: 100%; margin: 20px 0; }
+
+.product-item { flex: 1; max-width: 160px; background: #fff; border-radius: 12px; padding: 12px; display: flex; flex-direction: column; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+
+/* 썸네일 박스 */
+.thumb-container { width: 100%; aspect-ratio: 1/1; overflow: hidden; border-radius: 8px; background: #f9f9f9; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; }
+.brand-text { font-size: 11px; color: #aaa; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
+
+.product-name { font-size: 0.8rem; color: #444; margin-bottom: 10px; height: 2.4em; overflow: hidden; line-height: 1.2; text-align: center; font-weight: 500; }
+
+/* [핵심] 가격 레이아웃 수정 */
+.price-wrapper {
     display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    overflow: hidden;
-}
-
-/* 숏폼 규격 컨테이너 */
-.phone-wrapper {
-    width: var(--phone-width);
-    height: var(--phone-height);
-    background-color: var(--bg-color);
-    position: relative;
-    overflow: hidden;
-    /* 캡쳐를 위해 장식적인 테두리는 제거했습니다 */
-}
-
-/* 카드 컨테이너 */
-#card-container {
+    align-items: center;      /* 세로 중앙 정렬 (배지가 가격 뭉치 중앙에 오도록) */
+    justify-content: center;  /* 가로 중앙 정렬 */
+    gap: 8px;                 /* 가격과 배지 사이 간격 */
     width: 100%;
-    height: 100%;
-    position: relative;
-    cursor: grab;
+    margin-top: 5px;
 }
 
-#card-container:active {
-    cursor: grabbing;
-}
-
-/* 개별 카드 스타일 */
-.sale-card {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    padding: 60px 20px;
+/* 가격 텍스트 기둥 (왼쪽: 세로로 쌓임) */
+.price-text-col {
     display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    background-color: var(--bg-color);
-    /* 하드웨어 가속을 이용한 부드러운 이동 */
-    will-change: transform;
-    user-select: none;
-}
-
-.logo-box {
-    width: 100%;             /* 가로 전체 사용 */
-    height: 60px;           /* 높이를 100px로 확대 (기존 60px에서 변경) */
-    margin-bottom: 20px;     /* 로고와 제목 사이 간격 */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-/* 플랫폼 텍스트 로고일 경우 스타일 */
-.logo-box {
-    font-size: 1.5rem;
-    font-weight: 800;
-    letter-spacing: 3px;
-    color: #000;
-}
-
-.logo-img {
-    height: 80px;
-    width: auto;
-    object-fit: contain;
-    
-    /* 이미지 깨짐 방지 핵심 코드 */
-    image-rendering: -webkit-optimize-contrast; /* 크롬, 사파리에서 대비와 선명도 최적화 */
-    image-rendering: crisp-edges;               /* 가장자리를 날카롭게 유지 */
-    transform: translateZ(0);                   /* 하드웨어 가속으로 선명도 보정 */
-}
-
-.sale-info h1 {
-    font-size: 2rem;
-    font-weight: 700;
-    margin-bottom: 15px;
-    word-break: keep-all;
-    line-height: 1.3;
-}
-
-.sale-info p {
-    font-size: 1.1rem;
-    color: #888;
-}
-
-.sale-info {
-    display: flex;
-    flex-direction: column;
-    align-items: center;    /* 가로 중앙 정렬 */
-    text-align: center;     /* 텍스트 중앙 정렬 */
-}
-
-/* 메뉴 버튼 (반투명 처리) */
-.menu-btn {
-    position: absolute;
-    bottom: 40px;
-    left: 30px;
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    background: rgba(0, 0, 0, 0.05);
-    color: #333;
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    font-size: 18px;
-    cursor: pointer;
-    z-index: 110;
-}
-
-/* 사이드 메뉴 */
-.side-menu {
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 80%;
-    height: 100%;
-    background: white;
-    z-index: 120;
-    padding: 60px 30px;
-    transition: left 0.4s cubic-bezier(0.25, 1, 0.5, 1);
-    box-shadow: 10px 0 30px rgba(0,0,0,0.1);
-}
-
-.side-menu.active {
-    left: 0;
-}
-
-.side-menu h3 { margin-bottom: 20px; }
-.side-menu ul { list-style: none; }
-.side-menu li { padding: 15px 0; border-bottom: 1px solid #eee; }
-
-/* 메뉴 헤더 배치 */
-.menu-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 25px;
-}
-
-.close-btn {
-    background: none;
-    border: none;
-    font-size: 28px;
-    cursor: pointer;
-    color: #888;
-}
-
-/* 추가 버튼 스타일링 */
-.add-main-btn {
-    width: 100%;
-    margin-top: 20px;
-    padding: 12px;
-    background: #222;
-    color: #fff;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: bold;
-}
-
-/* 오버레이 - 메뉴와 버튼보다는 아래, 메인 콘텐츠보다는 위 */
-.menu-overlay {
-    z-index: 100;
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.4);
-    display: none;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
-
-.menu-overlay.active {
-    display: block;
-    opacity: 1;
-}
-
-.main-title {
-    font-size: 2.2rem; /* 숏폼에서 가장 잘 보여야 하므로 크게 */
-    margin-bottom: 15px;
-    color: #000;
-}
-
-.detail-text {
-    font-size: 1.3rem;
-    color: #444;
-    margin-top: 30px;
-    margin-bottom: 15px;
-    line-height: 1.5;
-    font-weight: 500;
-}
-
-.period-text {
-    font-size: 1rem;
-    color: #999;
-    margin-top: 10px;
-}
-
-.benefits-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    justify-content: center;
-    margin: 15px 0;
-}
-
-.benefit-tag {
-    background-color: #f0f0f0;
-    color: #333;
-    padding: 4px 10px;
-    border-radius: 20px;
-    font-size: 0.9rem;
-    font-weight: 600;
-    border: 1px solid #ddd;
-}
-
-/* 편집 중인 요소 스타일 */
-[contenteditable="true"] {
-    outline: 2px dashed #3498db;
-    padding: 2px;
-    border-radius: 4px;
-    background-color: rgba(52, 152, 219, 0.1);
-}
-
-/* 해외 모드 전용 콤팩트 레이아웃 */
-.sale-card.overseas-mode {
-    padding: 0; /* 내부 여백 제거 후 중앙 정렬 제어 */
-    justify-content: center;
-}
-
-/* 중앙으로 모아주는 내부 컨테이너 */
-.overseas-inner {
-    width: 100%; /* 부모 안에서 꽉 차게 */
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto;
-}
-
-/* 2열 제품 그리드 */
-.product-grid {
-    display: flex; /* grid 대신 flex가 중앙 정렬 잡기 더 쉬울 수 있어요 */
-    justify-content: center;
-    gap: 15px;
-    width: 100%;
-    margin: 25px 0;
-    padding: 0 20px; /* 양옆 안전 거리 확보 */
-}
-
-.product-item {
-    position: relative; /* [핵심] 이걸 넣어야 할인율 박스가 아이템 안에 붙어있어요! */
-    flex: 1;
-    max-width: 160px;
-    background: #fff;
-    border-radius: 12px;
-    padding: 10px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.03); /* 아주 살짝 그림자 추가 */
-}
-
-.product-thumb {
-    width: 100%;
-    aspect-ratio: 1 / 1;
-    object-fit: cover;
-    border-radius: 8px;
-    margin-bottom: 10px;
-}
-
-/* 할인율 라벨 (이미지 우상단) */
-.discount-badge {
-    position: absolute;
-    top: 5px;
-    right: 5px;
-    background: #ff4d4d;
-    color: white;
-    padding: 2px 6px;
-    border-radius: 4px;
-    font-size: 0.75rem;
-    font-weight: bold;
-}
-
-.price-box {
-    text-align: center;
+    flex-direction: column;   /* 위아래로 쌓기 */
+    align-items: flex-end;    /* [중요] 텍스트를 오른쪽으로 정렬해서 배지와 가깝게 */
+    line-height: 1.1;         /* 줄 간격 좁히기 */
 }
 
 .sale-price {
-    font-size: 1rem;
-    font-weight: 700;
+    font-size: 1.1rem;
+    font-weight: 800;
     color: #000;
-    display: block;
 }
 
 .original-price {
+    font-size: 0.75rem;
+    color: #bbb;
+    text-decoration: line-through;
+    margin-top: 2px;
+}
+
+/* 할인율 배지 박스 (오른쪽) */
+.discount-badge-box {
+    background: #ff4d4d;
+    color: white;
+    padding: 6px 8px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 800;
+    line-height: 1;
+    white-space: nowrap;      /* 줄바꿈 방지 */
+}
+
+/* UI 요소들 */
+.menu-btn { position: absolute; bottom: 30px; left: 20px; width: 45px; height: 45px; border-radius: 50%; background: rgba(255,255,255,0.9); color: #333; border: 1px solid rgba(0,0,0,0.1); font-size: 18px; cursor: pointer; z-index: 110; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+.side-menu { position: absolute; top: 0; left: -100%; width: 80%; height: 100%; background: white; z-index: 120; padding: 60px 30px; transition: left 0.4s ease; box-shadow: 10px 0 30px rgba(0,0,0,0.1); }
+.side-menu.active { left: 0; }
+.side-menu h3 { margin-bottom: 20px; font-size: 1.2rem; }
+.side-menu ul { list-style: none; }
+.side-menu li { padding: 15px 0; border-bottom: 1px solid #f4f4f4; }
+.menu-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+.close-btn { background: none; border: none; font-size: 28px; cursor: pointer; color: #888; }
+.add-main-btn { width: 100%; margin-top: 20px; padding: 14px; background: #222; color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 1rem; }
+.menu-overlay { z-index: 100; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; opacity: 0; transition: opacity 0.3s ease; backdrop-filter: blur(2px); }
+.menu-overlay.active { display: block; opacity: 1; }
+.editing { outline: 2px dashed #3498db; background-color: rgba(52, 152, 219, 0.1); min-width: 50px; }
+
+/* 1. 전체 틀: 가로 정렬 & 중앙 정렬 */
+.final-layout {
+    display: flex !important;
+    flex-direction: row !important; /* 가로 배치 */
+    align-items: center !important; /* 세로 중앙 정렬 */
+    justify-content: center !important;
+    gap: 8px !important; /* 가격과 배지 사이 간격 */
+    width: 100%;
+    /*margin-top: 5px;
+    padding: 5px 0;*/
+}
+
+/* 2. 왼쪽 가격 기둥: 세로 정렬 & 오른쪽 끝 맞춤 */
+.final-price-col {
+    display: flex !important;
+    flex-direction: column !important; /* 위아래로 쌓기 */
+    align-items: flex-center !important;  /* 글자들을 오른쪽으로 밀어서 배지와 붙임 */
+    justify-content: center;
+    line-height: 1.2;
+}
+
+/* 할인가 (위, 굵게) */
+.final-sale {
+    font-size: 1.1rem;
+    font-weight: 900;
+    color: #000;
+    display: block;
+    cursor: pointer; /* 수정 가능함 표시 */
+}
+
+/* 정가 (아래, 얇게) */
+.final-original {
     font-size: 0.8rem;
     color: #bbb;
     text-decoration: line-through;
+    display: block;
+    cursor: pointer;
+    text-align: center;
 }
 
-
-.thumb-container {
-    width: 100%;
-    aspect-ratio: 1/1;
-    overflow: hidden;
-    border-radius: 8px;
-    background: #f9f9f9;
+/* 3. 오른쪽 배지 기둥 */
+.final-badge-col {
     display: flex;
     align-items: center;
-    justify-content: center;
+    height: 100%;
 }
 
-.discount-badge-inline {
-    background-color: #ff4d4d;
+/* 빨간 박스 디자인 */
+.final-badge {
+    display: flex; /* 내부 텍스트 정렬을 위해 flex 사용 */
+    align-items: center;
+    background: #ff4d4d;
     color: white;
-    padding: 2px 6px;
-    border-radius: 4px;
-    font-size: 0.75rem;
-    font-weight: 800;
-    height: fit-content; /* 텍스트 높이에 맞춤 */
+    padding: 4px 5px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    white-space: nowrap; /* 줄바꿈 절대 금지 */
+    box-shadow: 0 2px 5px rgba(255, 77, 77, 0.2);
+    line-height: 1;
 }
 
+/* 배지 내부 숫자 수정 시 스타일 */
+.final-badge span {
+    cursor: pointer;
+}
+
+/* =========================================
+   ★ 해외 포맷 전용 스타일 재정의 (국내 영향 X) ★
+   ========================================= */
+
+/* 1. 전체 컨테이너 상단 여백 줄임 */
+.sale-card.overseas-mode {
+    padding-top: 30px !important; /* 기존 60px에서 30px로 확 줄임 */
+}
+
+.overseas-inner {
+    /* 내부 요소 간격도 좁힘 */
+    gap: 10px; 
+}
+
+/* 2. 로고 박스 크기 및 여백 축소 (해외만) */
+.overseas-inner .logo-box {
+    height: 50px !important;    /* 기존 80px -> 50px */
+    margin-bottom: 5px !important; /* 기존 20px -> 5px */
+}
+
+/* 3. 브랜드명(타이틀) 크기 및 여백 축소 (해외만) */
+.overseas-inner .main-title {
+    font-size: 1.5rem !important;   /* 기존 2rem -> 1.5rem */
+    margin-bottom: 15px !important; /* 기존 20px -> 15px */
+    line-height: 1.2 !important;
+}
+
+/* 4. 상품 그리드 위아래 간격 좁힘 */
+.product-grid {
+    margin: 10px 0 15px 0 !important; /* 위 10px, 아래 15px로 축소 */
+}
+
+/* 5. 혜택 태그 영역 간격 좁힘 */
+.overseas-inner .benefits-container {
+    margin: 5px 0 10px 0 !important;
+}
+
+/* 6. 기간 텍스트 상단 여백 좁힘 */
+.overseas-inner .period-text {
+    margin-top: 5px !important;
+}
+
+/* (선택사항) 상품 카드 자체 크기도 살짝 줄여서 공간 확보 */
+.product-item {
+    padding: 10px !important; /* 내부 여백 축소 */
+}
 .product-name {
-    font-size: 0.75rem;
-    color: #666;
-    margin: 10px 0 2px 0; /* 상단 마진을 10px로 살짝 늘림 */
-    height: 2.4em;
-    overflow: hidden;
-    line-height: 1.2;
-    width: 90%; /* 너무 꽉 차지 않게 */
-    text-align: center;
+    font-size: 0.75rem !important; /* 폰트 크기 살짝 축소 */
+    margin-bottom: 6px !important;
+}
+
+/* =========================================
+   ★ 해외 포맷 전용: 위치 상향 조정 (규격 유지) ★
+   ========================================= */
+
+/* 1. 해외 모드 카드 컨테이너 설정 */
+.sale-card.overseas-mode {
+    /* [핵심] 아래쪽에 140px 만큼의 투명한 벽돌을 쌓는 원리입니다.
+       Flexbox가 중앙 정렬을 할 때, 이 공백 때문에 내용물이 위로 밀려 올라갑니다. 
+       더 위로 올리고 싶으면 이 숫자(140px)를 늘리세요! */
+    padding-bottom: 50px !important; 
+    
+    /* 혹시 모를 정렬 오류 방지 */
+    justify-content: center !important;
 }
