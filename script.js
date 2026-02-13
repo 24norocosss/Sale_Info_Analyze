@@ -21,47 +21,79 @@ function saveData() {
 }
 
 function renderAll() {
-    // [메인 카드 렌더링]
+    // 1. 메인 카드 영역 비우기
     container.innerHTML = '';
+    
+    // 2. 카드 렌더링 (해외/국내 분기)
     saleData.forEach((data, index) => {
         const card = document.createElement('div');
-        card.className = 'sale-card';
+        card.className = `sale-card ${data.top_deals ? 'overseas-mode' : ''}`;
         
-        // [수정 포인트] 로고 이미지가 깨졌을 때 기본 쇼핑백 아이콘으로 교체하는 로직
         const defaultLogo = 'https://cdn-icons-png.flaticon.com/512/1162/1162456.png';
         const logoUrl = data.logo || defaultLogo;
 
-        // [핵심 수정] 모든 텍스트 요소에 ondblclick="editElement(this, ${index}, '필드명')" 추가
-        card.innerHTML = `
-            <div class="logo-box">
-                <img src="${logoUrl}" class="logo-img" onerror="this.onerror=null; this.src='${defaultLogo}';">
-            </div>
-            <div class="sale-info">
-                <h1 class="main-title" 
-                    ondblclick="makeEditable(this, ${index}, 'title')">${data.title || data.info || '제목 없음'}</h1>
-                
-                <div class="benefits-container">
-                    ${(data.benefits || []).map((b, bIndex) => `
-                        <span class="benefit-tag" 
-                              ondblclick="makeEditable(this, ${index}, 'benefits', ${bIndex})">${b}</span>
-                    `).join('')}
+        if (data.top_deals && data.top_deals.length > 0) {
+            // [해외 모드 HTML]
+            card.innerHTML = `
+                <div class="overseas-inner">
+                    <div class="logo-box">
+                        <img src="${logoUrl}" class="logo-img" onerror="this.src='${defaultLogo}'">
+                    </div>
+                    <div class="product-grid">
+                        ${data.top_deals.slice(0, 2).map(item => `
+                            <div class="product-item">
+                                ${item.discount > 0 ? `<span class="discount-badge">${item.discount}%</span>` : ''}
+                                
+                                <div class="thumb-container" style="width: 100%; aspect-ratio: 1/1; background: #f4f4f4; border-radius: 8px; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                                    <img src="${item.imageUrl}" 
+                                        class="product-thumb" 
+                                        style="width: 100%; height: 100%; object-fit: contain;"
+                                        onerror="this.onerror=null; this.style.display='none'; this.parentElement.innerHTML='<div style=\'color:#bbb; font-size:11px; font-weight:bold; line-height:1.2;\'>${item.brand}<br>NO IMAGE</div>';">
+                                </div>
+                                
+                                <div class="product-name" style="font-size: 0.75rem; color: #666; margin: 8px 0 4px 0; height: 2.4em; overflow: hidden; line-height: 1.2; width: 100%;">
+                                    ${item.name}
+                                </div>
+
+                                <div class="price-box">
+                                    <span class="sale-price" style="font-size: 0.9rem; font-weight: 800; color:#000;">${item.salePrice}</span>
+                                    <span class="original-price" style="font-size: 0.75rem; color: #ddd; text-decoration: line-through; display:block;">${item.originalPrice}</span>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="benefits-container">
+                        ${(data.benefits || []).map(b => `<span class="benefit-tag">${b}</span>`).join('')}
+                    </div>
+                    <p class="period-text">${data.duration || '재고 소진 시까지'}</p>
                 </div>
-                
-                <p class="period-text" 
-                   ondblclick="makeEditable(this, ${index}, 'duration')">${data.duration || data.period || '기간 정보 없음'}</p>
-            </div>
-        `;
+            `;
+        } else {
+            // [국내 모드 HTML]
+            card.innerHTML = `
+                <div class="logo-box">
+                    <img src="${logoUrl}" class="logo-img" onerror="this.src='${defaultLogo}'">
+                </div>
+                <div class="sale-info">
+                    <h1 class="main-title" ondblclick="makeEditable(this, ${index}, 'title')">${data.title || data.info || '제목 없음'}</h1>
+                    <div class="benefits-container">
+                        ${(data.benefits || []).map((b, bi) => `<span class="benefit-tag" ondblclick="makeEditable(this, ${index}, 'benefits', ${bi})">${b}</span>`).join('')}
+                    </div>
+                    <p class="period-text" ondblclick="makeEditable(this, ${index}, 'duration')">${data.duration || data.period || '기간 정보 없음'}</p>
+                </div>
+            `;
+        }
         
-        // 현재 인덱스에 맞춰 위치 초기화 (드래그 로직과 연동)
         card.style.transform = `translateX(${(index - currentIndex) * 100}%)`;
         container.appendChild(card);
     });
-    // [메뉴 리스트 렌더링]
-    platformList.innerHTML = '';
+
+    // [중요!] 3. 메뉴 리스트 렌더링 (이 부분이 다시 들어가야 리스트가 보입니다)
+    platformList.innerHTML = ''; 
     saleData.forEach((data, index) => {
         const li = document.createElement('li');
         li.innerHTML = `
-            ${data.platform} 
+            ${data.platform || '알 수 없음'} 
             <button onclick="deletePlatform(${index})" style="float:right; border:none; background:none; color:#ff4d4d; cursor:pointer; font-weight:bold;">삭제</button>
         `;
         platformList.appendChild(li);

@@ -239,3 +239,105 @@ body {
     border-radius: 4px;
     background-color: rgba(52, 152, 219, 0.1);
 }
+
+/* 해외 모드 전용 콤팩트 레이아웃 */
+.sale-card.overseas-mode {
+    padding: 0; /* 내부 여백 제거 후 중앙 정렬 제어 */
+    justify-content: center;
+}
+
+/* 중앙으로 모아주는 내부 컨테이너 */
+.overseas-inner {
+    width: 100%; /* 부모 안에서 꽉 차게 */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+}
+
+/* 2열 제품 그리드 */
+.product-grid {
+    display: flex; /* grid 대신 flex가 중앙 정렬 잡기 더 쉬울 수 있어요 */
+    justify-content: center;
+    gap: 15px;
+    width: 100%;
+    margin: 25px 0;
+    padding: 0 20px; /* 양옆 안전 거리 확보 */
+}
+
+.product-item {
+    position: relative; /* [핵심] 이걸 넣어야 할인율 박스가 아이템 안에 붙어있어요! */
+    flex: 1;
+    max-width: 160px;
+    background: #fff;
+    border-radius: 12px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.03); /* 아주 살짝 그림자 추가 */
+}
+
+.product-thumb {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
+/* 할인율 라벨 (이미지 우상단) */
+.discount-badge {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: #ff4d4d;
+    color: white;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: bold;
+}
+
+.price-box {
+    text-align: center;
+}
+
+.sale-price {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #000;
+    display: block;
+}
+
+.original-price {
+    font-size: 0.8rem;
+    color: #bbb;
+    text-decoration: line-through;
+}
+
+/* 날아간 할인율 박스 검거 */
+.discount-badge {
+    position: absolute;
+    top: 10px;    /* 아이템 안쪽 상단에서 10px */
+    right: 10px;   /* 아이템 안쪽 우측에서 10px */
+    background: #ff4d4d;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    z-index: 10;   /* 이미지보다 위에 뜨도록 */
+}
+
+.thumb-container {
+    width: 100%;
+    aspect-ratio: 1/1;
+    overflow: hidden;
+    border-radius: 8px;
+    background: #f9f9f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
