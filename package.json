@@ -1,0 +1,28 @@
+{
+  "name": "sale-info",
+  "version": "1.0.0",
+  "description": "",
+  "main": "script.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "axios": "^1.13.4",
+    "cheerio": "^1.2.0",
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "html-markdown": "^1.0.17",
+    "node": "^25.6.0",
+    "node-html-markdown": "^2.0.0",
+    "openai": "^6.17.0",
+    "playwright": "^1.58.1",
+    "playwright-extra": "^4.3.6",
+    "puppeteer-extra-plugin-stealth": "^2.11.2",
+    "zod": "^4.3.6"
+  }
+}

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Fashion Sale Alarm</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+
+    <div class="phone-wrapper">
+        <div id="side-menu" class="side-menu">
+            <div class="menu-header">
+                <h3>플랫폼 관리</h3>
+                <button id="menu-close" class="close-btn">&times;</button>
+            </div>
+            <ul id="platform-list"></ul>
+            <button onclick="addPlatform()" class="add-main-btn">+ 플랫폼 추가</button>
+        </div>
+        
+        <div id="menu-overlay" class="menu-overlay"></div>
+
+        <main id="card-container">
+            </main>
+
+        <button id="menu-trigger" class="menu-btn">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,241 @@
+:root {
+    --bg-color: #fcfaf7; /* 눈이 편한 오프화이트 */
+    --accent-color: #222;
+    --phone-width: 450px; 
+    --phone-height: 800px;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Pretendard', -apple-system, sans-serif;
+}
+
+body {
+    background-color: #222; /* 촬영 시 구분을 위해 외부 배경은 어둡게 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* 숏폼 규격 컨테이너 */
+.phone-wrapper {
+    width: var(--phone-width);
+    height: var(--phone-height);
+    background-color: var(--bg-color);
+    position: relative;
+    overflow: hidden;
+    /* 캡쳐를 위해 장식적인 테두리는 제거했습니다 */
+}
+
+/* 카드 컨테이너 */
+#card-container {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    cursor: grab;
+}
+
+#card-container:active {
+    cursor: grabbing;
+}
+
+/* 개별 카드 스타일 */
+.sale-card {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    padding: 60px 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    background-color: var(--bg-color);
+    /* 하드웨어 가속을 이용한 부드러운 이동 */
+    will-change: transform;
+    user-select: none;
+}
+
+.logo-box {
+    width: 100%;             /* 가로 전체 사용 */
+    height: 100px;           /* 높이를 100px로 확대 (기존 60px에서 변경) */
+    margin-bottom: 60px;     /* 로고와 제목 사이 간격 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+/* 플랫폼 텍스트 로고일 경우 스타일 */
+.logo-box {
+    font-size: 1.5rem;
+    font-weight: 800;
+    letter-spacing: 3px;
+    color: #000;
+}
+
+.logo-img {
+    height: 80px;
+    width: auto;
+    object-fit: contain;
+    
+    /* 이미지 깨짐 방지 핵심 코드 */
+    image-rendering: -webkit-optimize-contrast; /* 크롬, 사파리에서 대비와 선명도 최적화 */
+    image-rendering: crisp-edges;               /* 가장자리를 날카롭게 유지 */
+    transform: translateZ(0);                   /* 하드웨어 가속으로 선명도 보정 */
+}
+
+.sale-info h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 15px;
+    word-break: keep-all;
+    line-height: 1.3;
+}
+
+.sale-info p {
+    font-size: 1.1rem;
+    color: #888;
+}
+
+.sale-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;    /* 가로 중앙 정렬 */
+    text-align: center;     /* 텍스트 중앙 정렬 */
+}
+
+/* 메뉴 버튼 (반투명 처리) */
+.menu-btn {
+    position: absolute;
+    bottom: 40px;
+    left: 30px;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.05);
+    color: #333;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    font-size: 18px;
+    cursor: pointer;
+    z-index: 110;
+}
+
+/* 사이드 메뉴 */
+.side-menu {
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 80%;
+    height: 100%;
+    background: white;
+    z-index: 120;
+    padding: 60px 30px;
+    transition: left 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+    box-shadow: 10px 0 30px rgba(0,0,0,0.1);
+}
+
+.side-menu.active {
+    left: 0;
+}
+
+.side-menu h3 { margin-bottom: 20px; }
+.side-menu ul { list-style: none; }
+.side-menu li { padding: 15px 0; border-bottom: 1px solid #eee; }
+
+/* 메뉴 헤더 배치 */
+.menu-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 28px;
+    cursor: pointer;
+    color: #888;
+}
+
+/* 추가 버튼 스타일링 */
+.add-main-btn {
+    width: 100%;
+    margin-top: 20px;
+    padding: 12px;
+    background: #222;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+/* 오버레이 - 메뉴와 버튼보다는 아래, 메인 콘텐츠보다는 위 */
+.menu-overlay {
+    z-index: 100;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.4);
+    display: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.menu-overlay.active {
+    display: block;
+    opacity: 1;
+}
+
+.main-title {
+    font-size: 2.2rem; /* 숏폼에서 가장 잘 보여야 하므로 크게 */
+    margin-bottom: 15px;
+    color: #000;
+}
+
+.detail-text {
+    font-size: 1.3rem;
+    color: #444;
+    margin-top: 30px;
+    margin-bottom: 15px;
+    line-height: 1.5;
+    font-weight: 500;
+}
+
+.period-text {
+    font-size: 1rem;
+    color: #999;
+    margin-top: 10px;
+}
+
+.benefits-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    margin: 15px 0;
+}
+
+.benefit-tag {
+    background-color: #f0f0f0;
+    color: #333;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border: 1px solid #ddd;
+}
+
+/* 편집 중인 요소 스타일 */
+[contenteditable="true"] {
+    outline: 2px dashed #3498db;
+    padding: 2px;
+    border-radius: 4px;
+    background-color: rgba(52, 152, 219, 0.1);
+}
