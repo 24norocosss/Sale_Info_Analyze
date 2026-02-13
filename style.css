@@ -24,7 +24,20 @@ body { background-color: #222; display: flex; justify-content: center; align-ite
 
 /* 혜택 및 기간 */
 .benefits-container { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 15px 0; }
-.benefit-tag { background-color: #f0f0f0; color: #333; padding: 6px 12px; border-radius: 20px; font-size: 0.9rem; font-weight: 600; border: 1px solid #ddd; cursor: pointer; }
+.benefit-tag { 
+    background-color: #f0f0f0; 
+    color: #333; 
+    padding: 6px 12px; 
+    border-radius: 20px; 
+    font-size: 0.9rem; 
+    font-weight: 600; 
+    border: 1px solid #ddd; 
+    cursor: pointer; 
+    white-space: pre-wrap !important; 
+    word-break: break-all; /* 단어가 길어도 강제로 줄바꿈 */
+    line-height: 1.4;      /* 줄 간격 살짝 여유 있게 */
+    text-align: center;    /* 가운데 정렬 유지 */
+}
 .period-text { font-size: 1rem; color: #999; margin-top: 15px; cursor: pointer; }
 
 /* 해외 모드 전용 */
@@ -37,7 +50,18 @@ body { background-color: #222; display: flex; justify-content: center; align-ite
 .thumb-container { width: 100%; aspect-ratio: 1/1; overflow: hidden; border-radius: 8px; background: #f9f9f9; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; }
 .brand-text { font-size: 11px; color: #aaa; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
 
-.product-name { font-size: 0.8rem; color: #444; margin-bottom: 10px; height: 2.4em; overflow: hidden; line-height: 1.2; text-align: center; font-weight: 500; }
+.product-name { 
+    font-size: 0.8rem; 
+    color: #444; 
+    margin-bottom: 10px; 
+    height: 2.4em; 
+    overflow: hidden; 
+    line-height: 1.2; 
+    text-align: center; 
+    font-weight: 500; 
+    white-space: pre-wrap !important;
+    line-height: 1.3;
+}
 
 /* [핵심] 가격 레이아웃 수정 */
 .price-wrapper {
@@ -97,45 +121,61 @@ body { background-color: #222; display: flex; justify-content: center; align-ite
 .editing { outline: 2px dashed #3498db; background-color: rgba(52, 152, 219, 0.1); min-width: 50px; }
 
 /* 1. 전체 틀: 가로 정렬 & 중앙 정렬 */
+/* [핵심] 가격 레이아웃 수정 (숨김 기능 제거 & 자연스러운 배치) */
 .final-layout {
     display: flex !important;
-    flex-direction: row !important; /* 가로 배치 */
-    align-items: center !important; /* 세로 중앙 정렬 */
+    flex-direction: row !important;
+    align-items: center !important;
     justify-content: center !important;
-    gap: 8px !important; /* 가격과 배지 사이 간격 */
+    gap: 3px !important;
     width: 100%;
-    /*margin-top: 5px;
-    padding: 5px 0;*/
+    margin-top: 5px;
+    padding: 0 10px;
+    /* 전체 너비가 부모를 넘지 않도록 제한 */
+    max-width: 100%; 
 }
-
-/* 2. 왼쪽 가격 기둥: 세로 정렬 & 오른쪽 끝 맞춤 */
+/* 왼쪽 가격 기둥 */
 .final-price-col {
     display: flex !important;
-    flex-direction: column !important; /* 위아래로 쌓기 */
-    align-items: flex-center !important;  /* 글자들을 오른쪽으로 밀어서 배지와 붙임 */
+    flex-direction: column !important;
+    
+    /* [핵심 1] 아이템들을 가로축 기준 가운데로 모음 */
+    align-items: center !important; 
+    
     justify-content: center;
     line-height: 1.2;
+    
+    flex: 1; 
+    min-width: 0; 
+    overflow: hidden; 
+    padding-right: 2px; 
 }
-
-/* 할인가 (위, 굵게) */
+/* 할인가 (JS가 크기를 조절할 대상) */
 .final-sale {
-    font-size: 1.1rem;
+    font-size: 1.1rem; 
     font-weight: 900;
     color: #000;
     display: block;
-    cursor: pointer; /* 수정 가능함 표시 */
+    cursor: pointer;
+    white-space: nowrap;
+    
+    width: 100%;
+    /* [핵심 2] 텍스트 자체도 가운데 정렬 */
+    text-align: center !important; 
 }
-
-/* 정가 (아래, 얇게) */
+/* 정가 */
 .final-original {
     font-size: 0.8rem;
     color: #bbb;
     text-decoration: line-through;
     display: block;
     cursor: pointer;
-    text-align: center;
+    white-space: nowrap;
+    
+    width: 100%;
+    /* [핵심 2] 텍스트 자체도 가운데 정렬 */
+    text-align: center !important; 
 }
-
 /* 3. 오른쪽 배지 기둥 */
 .final-badge-col {
     display: flex;
@@ -144,16 +184,20 @@ body { background-color: #222; display: flex; justify-content: center; align-ite
 }
 
 /* 빨간 박스 디자인 */
+/* 오른쪽 빨간 할인율 박스: 절대 변하지 않는 고정체! */
+/* 오른쪽 배지 (고정) */
 .final-badge {
-    display: flex; /* 내부 텍스트 정렬을 위해 flex 사용 */
+    flex-shrink: 0 !important; /* 절대 안 줄어듦 */
+    display: flex;
     align-items: center;
+    justify-content: center;
     background: #ff4d4d;
     color: white;
-    padding: 4px 5px;
-    font-size: 0.85rem;
-    font-weight: 700;
-    white-space: nowrap; /* 줄바꿈 절대 금지 */
-    box-shadow: 0 2px 5px rgba(255, 77, 77, 0.2);
+    padding: 6px 8px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 800;
+    white-space: nowrap;
     line-height: 1;
 }
 

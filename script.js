@@ -90,8 +90,10 @@ function renderAll() {
     });
 
     updateSideMenu();
+    // [추가] 렌더링이 끝나면 글자 크기 자동 조절 실행!
+    // 약간의 딜레이(0초)를 줘야 브라우저가 너비를 계산한 뒤 실행됨
+    setTimeout(fitTextToContainer, 0);
 }
-
 // ... 사이드 메뉴 및 기타 함수들 ...
 function updateSideMenu() {
     platformList.innerHTML = '';
@@ -175,7 +177,7 @@ window.addEventListener('mouseup', () => {
     updateSideMenu();
 });
 
-// [수정 기능] 깊은 데이터(top_deals)까지 수정 가능하도록 업그레이드됨
+// [줄바꿈 기능 추가] Shift + Enter 허용 버전
 window.makeEditable = function(element, dataIndex, field, subIndex = null, subField = null) {
     if (Math.abs(currentMove) > 5) return;
 
@@ -183,17 +185,24 @@ window.makeEditable = function(element, dataIndex, field, subIndex = null, subFi
     element.focus();
     element.classList.add('editing');
 
+    // [핵심] 줄바꿈이 보이려면 CSS가 뒷받침되어야 함
+    // 편집 중일 때만 강제로 줄바꿈 허용 스타일 적용
+    const originalStyle = element.style.whiteSpace;
+    element.style.whiteSpace = "pre-wrap"; 
+
     element.onblur = function() {
         element.contentEditable = false;
         element.classList.remove('editing');
         
-        const newValue = element.innerText.trim();
+        // 편집 끝나면 원래 스타일로 복구하지 않고, 줄바꿈이 유지되도록 둠
+        // (단, 가격 태그 같은 건 한 줄 유지가 나을 수 있으므로 상황 봐서 CSS로 제어)
+        
+        const newValue = element.innerText; // innerText는 줄바꿈을 \n으로 저장함
 
         if (field === 'benefits' && subIndex !== null) {
             saleData[dataIndex].benefits[subIndex] = newValue;
         } 
         else if (field === 'top_deals' && subIndex !== null && subField !== null) {
-            // 상품 정보 상세 수정
             saleData[dataIndex].top_deals[subIndex][subField] = newValue;
         } 
         else {
@@ -205,6 +214,12 @@ window.makeEditable = function(element, dataIndex, field, subIndex = null, subFi
     };
 
     element.onkeydown = function(e) {
+        // 1. Shift + Enter 누르면? -> 줄바꿈 허용 (이벤트 막지 않음)
+        if (e.key === 'Enter' && e.shiftKey) {
+            return; 
+        }
+
+        // 2. 그냥 Enter 누르면? -> 저장하고 나가기
         if (e.key === 'Enter') {
             e.preventDefault();
             element.blur();
@@ -264,5 +279,30 @@ function closeMenu() { sideMenu.classList.remove('active'); menuOverlay.classLis
 if (menuBtn) menuBtn.addEventListener('click', openMenu);
 if (closeBtn) closeBtn.addEventListener('click', closeMenu);
 if (menuOverlay) menuOverlay.addEventListener('click', closeMenu);
+
+// [자동 맞춤 수식] 가격(할인가 + 정가)이 길면 폰트 크기를 줄여서 박스 안에 넣는 함수
+// [최종 수정] 텍스트가 넘칠 때만 크기를 줄이는 스마트 함수
+function fitTextToContainer() {
+    // 할인가와 정가 모두 선택
+    const priceTexts = document.querySelectorAll('.final-sale, .final-original');
+    
+    priceTexts.forEach(el => {
+        // 1. 원래 지정된 폰트 크기로 초기화 (스타일 시트 값 복원)
+        // 할인가(.final-sale)는 1.1rem, 정가(.final-original)는 0.8rem이 기본값
+        // 이렇게 해야 글자가 짧아졌을 때 다시 커질 수 있음
+        el.style.fontSize = ''; 
+        
+        // 현재 적용된 폰트 크기 계산 (px 단위)
+        let currentSize = parseFloat(window.getComputedStyle(el).fontSize);
+        const minSize = 10; // 최소 10px까지만 줄어듦 (너무 작으면 안 보이니까)
+
+        // 2. [핵심] 텍스트가 박스보다 클 때만 반복해서 줄임
+        // scrollWidth(실제 글자 길이) > clientWidth(박스 너비)
+        while (el.scrollWidth > el.clientWidth && currentSize > minSize) {
+            currentSize -= 0.5; // 0.5px씩 살살 줄임
+            el.style.fontSize = currentSize + 'px';
+        }
+    });
+}
 
 renderAll();
