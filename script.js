@@ -24,7 +24,6 @@ function renderAll() {
     saleData.forEach((data, index) => {
         const card = document.createElement('div');
         const hasTopDeals = data.top_deals && Array.isArray(data.top_deals) && data.top_deals.length > 0;
-        
         card.className = `sale-card ${hasTopDeals ? 'overseas-mode' : ''}`;
         card.style.transform = `translateX(${(index - currentIndex) * 100}%)`;
         
@@ -85,7 +84,61 @@ function renderAll() {
                 ${durationText ? `<p class="period-text" onclick="makeEditable(this, ${index}, 'duration')">${durationText}</p>` : ''}
             `;
         }
-        
+        const benefitsContainer = card.querySelector('.benefits-container');
+
+        if (benefitsContainer) {
+            // 2. 기존에 문자열로 만들어진 태그들을 싹 지우고, 기능이 있는 태그로 다시 조립합니다.
+            benefitsContainer.innerHTML = ''; 
+
+            const benefitsList = (data.benefits && data.benefits.length > 0) ? data.benefits : ["혜택을 추가해주세요"];
+
+            benefitsList.forEach((benefit, bIndex) => {
+                // (1) 감싸는 상자 (benefit-wrapper)
+                const wrapper = document.createElement('div');
+                wrapper.className = 'benefit-wrapper';
+
+                // (2) 혜택 텍스트 (기존 benefit-tag 클래스 유지)
+                const tag = document.createElement('span');
+                tag.className = 'benefit-tag';
+                tag.innerText = benefit;
+                // 클릭하면 수정 모드 (기존 makeEditable 함수 사용)
+                tag.onclick = (e) => {
+                    e.stopPropagation();
+                    makeEditable(tag, index, 'benefits', bIndex);
+                };
+
+                // (3) 파란색 + 버튼 (추가)
+                const addBtn = document.createElement('button');
+                addBtn.className = 'benefit-btn btn-add';
+                addBtn.innerText = '🞢';
+                addBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    saleData[index].benefits.splice(bIndex + 1, 0, "혜택 입력");
+                    saveData();
+                    renderAll();
+                };
+
+                // (4) 빨간색 X 버튼 (삭제)
+                const delBtn = document.createElement('button');
+                delBtn.className = 'benefit-btn btn-del';
+                delBtn.innerText = '✕';
+                delBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    saleData[index].benefits.splice(bIndex, 1);
+                    if (saleData[index].benefits.length === 0) {
+                        saleData[index].benefits.push("혜택을 추가해주세요");
+                    }
+                    saveData();
+                    renderAll();
+                };
+
+                // (5) 조립해서 컨테이너에 넣기
+                wrapper.appendChild(tag);
+                wrapper.appendChild(addBtn);
+                wrapper.appendChild(delBtn);
+                benefitsContainer.appendChild(wrapper);
+            });
+        }
         container.appendChild(card);
     });
 

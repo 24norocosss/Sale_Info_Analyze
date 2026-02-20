@@ -15,6 +15,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+
 // ★ API 키 확인
 const openai = new OpenAI({ apiKey });
 
@@ -141,7 +142,7 @@ app.post('/scrape', async (req, res) => {
 
             // --- 공통 데이터 추출 ---
             const getMeta = (prop) => document.querySelector(`meta[property="${prop}"], meta[name="${prop}"]`)?.content || "";
-            const metaTitle = getMeta('og:title') || document.title;
+            const metaTitle = document.querySelector('meta[property="og:title"]')?.content || document.title;
             const metaDesc = getMeta('og:description') || getMeta('description'); 
             const realTitle = (metaTitle || "").split('|')[0].trim();
 
@@ -150,7 +151,93 @@ app.post('/scrape', async (req, res) => {
 
             // [해외 모드 유지]
             if (currentMode === 'overseas') {
-                 // ... (기존 해외 모드 로직 유지) ...
+                // 후보군 찾기
+                const allElements = Array.from(document.querySelectorAll('div, li, article, a'));
+                const candidateCards = allElements.filter(el => {
+                    if (el.innerText.length > 400 || el.innerText.length < 10) return false;
+                    const hasPrice = /[\$₩€£¥]|USD|KRW|JPY|EUR/.test(el.innerText);
+                    const hasImage = el.querySelector('img');
+                    const isVisible = el.offsetWidth > 0 && el.offsetHeight > 0;
+                    return hasPrice && hasImage && isVisible;
+                });
+
+                // 중복 제거
+                const uniqueCards = [];
+                const seenText = new Set();
+                candidateCards.forEach(card => {
+                    const txt = card.innerText.trim();
+                    if (!seenText.has(txt)) { seenText.add(txt); uniqueCards.push(card); }
+                });
+
+                const targetCards = uniqueCards.slice(0, 30);
+                const products = [];
+
+                targetCards.forEach(el => {
+                    // [핵심] 텍스트 전체에서 가격 패턴만 쏙쏙 뽑아내는 정규표현식
+                    // 예: $100, $ 100, 100원, 100 KRW, 100.00 등
+                    const pricePattern = /([$€£¥₩]\s*[0-9,]+(\.[0-9]{1,2})?)|([0-9,]+(\.[0-9]{1,2})?\s*(?:원|KRW|USD|EUR|JPY))/gi;
+                    
+                    const fullText = el.innerText;
+                    // match로 찾으면 ["$100", "$200"] 처럼 배열로 나옴
+                    const foundPrices = fullText.match(pricePattern);
+
+                    if (foundPrices && foundPrices.length > 0) {
+                        // 가격 외의 텍스트(브랜드, 상품명) 찾기
+                        // 가격들을 제거한 문자열을 만들어서 줄바꿈으로 나눔
+                        let textOnly = fullText;
+                        foundPrices.forEach(p => { textOnly = textOnly.replace(p, ''); });
+                        
+                        const textLines = textOnly.split('\n').map(t => t.trim()).filter(t => t.length > 1);
+                        const bName = textLines[0] || "BRAND";
+                        const pName = textLines[1] || textLines[0] || "Item Name";
+
+                        let sPrice = foundPrices[0]; // 기본값
+                        let oPrice = "";
+
+                        // 가격이 2개 이상 발견되면 비교 시작
+                        if (foundPrices.length >= 2) {
+                            // 숫자만 추출해서 크기 비교
+                            const nums = foundPrices.map(p => parseFloat(p.replace(/[^0-9.]/g, '')));
+                            
+                            // 0번째와 1번째 가격 비교
+                            if (nums[0] > nums[1]) {
+                                // 앞쪽이 더 비싸면 (정가 -> 할인가 순서)
+                                oPrice = foundPrices[0];
+                                sPrice = foundPrices[1];
+                            } else {
+                                // 뒤쪽이 더 비싸면 (할인가 -> 정가 순서)
+                                sPrice = foundPrices[0];
+                                oPrice = foundPrices[1];
+                            }
+                        }
+
+                        // 할인율 계산
+                        let disc = 0;
+                        const sVal = parseFloat(sPrice.replace(/[^0-9.]/g, ''));
+                        const oVal = parseFloat((oPrice || sPrice).replace(/[^0-9.]/g, ''));
+                        
+                        if (oVal > sVal && oVal > 0) {
+                            disc = Math.round(((oVal - sVal) / oVal) * 100);
+                        }
+
+                        // 유효성 검사 후 저장
+                        if (sVal > 0) {
+                            products.push({
+                                brand: bName,
+                                name: pName,
+                                salePrice: sPrice,
+                                originalPrice: oPrice, // 정가가 없으면 빈 문자열
+                                discount: disc
+                            });
+                        }
+                    }
+                });
+
+                foundCount = products.length;
+                finalProducts = products.length > 0 ? products.sort(() => 0.5 - Math.random()).slice(0, 2) : [];
+
+                candidateCards.forEach(el => el.remove());
+                document.querySelectorAll('[class*="product"], [class*="item"], [class*="grid"]').forEach(e => e.remove());
             }
 
             // 노이즈 제거
@@ -217,7 +304,7 @@ app.post('/scrape', async (req, res) => {
             - Page Title과 관계없는 상시 광고(신규회원, 앱다운)는 무시.
             - Page Title이 '신규회원 이벤트'라면 포함.
 
-            응답 형식 JSON: {"duration": "...", "benefits": ["...", "..."]}
+            응답 한국어로 JSON 형식: {"duration": "...", "benefits": ["...", "..."]}
         `;
         
         const completion = await openai.chat.completions.create({

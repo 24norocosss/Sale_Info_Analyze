@@ -360,3 +360,65 @@ body { background-color: #222; display: flex; justify-content: center; align-ite
     flex-shrink: 0;
     margin-top: 10px;
 }
+
+/* [혜택 박스 컨트롤] 버튼 디자인 추가 */
+
+/* 1. 혜택 박스와 버튼을 감싸는 컨테이너 (위치 기준점) */
+.benefit-wrapper {
+    position: relative;
+    display: inline-block;
+    margin: 3px 2px; /* 혜택 박스 간격 */
+    vertical-align: middle;
+}
+
+/* 2. 기존 benefit-tag 스타일 보정 (컨테이너 안에서 작동하도록) */
+.benefit-wrapper .benefit-tag {
+    margin: 0 !important; /* 컨테이너가 간격을 담당하므로 태그 자체 마진 제거 */
+    display: block;
+    padding-right: 15px; /* 버튼이 글자를 가리지 않게 오른쪽 여백 확보 */
+}
+
+/* 3. 컨트롤 버튼 공통 스타일 */
+.benefit-btn {
+    position: absolute;
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+    border: none;
+    color: white;
+    font-size: 10px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    opacity: 0; /* 평소엔 투명해서 안 보임 */
+    transition: opacity 0.2s, transform 0.1s;
+    z-index: 10;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* [핵심] 마우스를 올렸을 때만 버튼 등장! */
+.benefit-wrapper:hover .benefit-btn {
+    opacity: 1;
+}
+
+/* 버튼 클릭감 (눌렀을 때 살짝 작아짐) */
+.benefit-btn:active { transform: scale(0.9); }
+
+/* 4. 상단 파란색 + 버튼 (추가) */
+.btn-add {
+    margin-top: 2px;
+    top: -2px;
+    right: -4px;
+    background-color: #007bff; /* 파랑 */
+}
+
+/* 5. 하단 빨간색 X 버튼 (삭제) */
+.btn-del {
+    margin-bottom: 2px;
+    bottom: -2px;
+    right: -4px;
+    background-color: #ff4d4d; /* 빨강 */
+}
