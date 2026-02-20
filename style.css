@@ -422,3 +422,49 @@ body { background-color: #222; display: flex; justify-content: center; align-ite
     right: -4px;
     background-color: #ff4d4d; /* 빨강 */
 }
+
+/* ========================================= */
+/* 📸 [추가] 이미지 다운로드 버튼 스타일 */
+/* ========================================= */
+
+/* 버튼 그룹 컨테이너 (우측 하단 고정) */
+.download-btn-group {
+    position: absolute;
+    bottom: 31px; /* 왼쪽 메뉴 버튼과 동일한 높이 */
+    right: 20px;  /* 왼쪽 메뉴 버튼과 동일한 간격 */
+    z-index: 600; /* 다른 요소들보다 위에 배치 */
+    display: flex;
+    gap: 10px; /* 버튼 사이 간격 */
+}
+
+/* 버튼 공통 스타일 */
+.download-btn-group button {
+    height: 45px; /* 왼쪽 메뉴 버튼 높이와 통일 */
+    padding: 0 20px; /* 텍스트가 들어가므로 넓이 확보 */
+    background-color: white;
+    border: 1px solid #eee;
+    border-radius: 25px; /* 둥근 모서리 (알약 모양) */
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    
+    font-size: 14px;
+    font-weight: bold;
+    color: #333;
+    cursor: pointer;
+    
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px; /* 이모지와 텍스트 사이 간격 */
+    
+    transition: transform 0.2s, background-color 0.2s;
+}
+
+/* 마우스 오버 효과 */
+.download-btn-group button:hover {
+    transform: scale(1.05); /* 살짝 커짐 */
+    background-color: #f9f9f9;
+}
+
+.download-btn-group button:active {
+    transform: scale(0.98); /* 클릭 시 눌림 */
+}

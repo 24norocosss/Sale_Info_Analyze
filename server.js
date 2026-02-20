@@ -15,7 +15,6 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-
 // ★ API 키 확인
 const openai = new OpenAI({ apiKey });
 

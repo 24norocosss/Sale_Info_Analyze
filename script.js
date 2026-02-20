@@ -27,7 +27,10 @@ function renderAll() {
         card.className = `sale-card ${hasTopDeals ? 'overseas-mode' : ''}`;
         card.style.transform = `translateX(${(index - currentIndex) * 100}%)`;
         
-        const logoUrl = data.logo || 'https://cdn-icons-png.flaticon.com/512/1162/1162456.png';
+        // 1. 원래 주소를 먼저 가져오고
+        const rawLogoUrl = data.logo || 'https://cdn-icons-png.flaticon.com/512/1162/1162456.png';
+        // 2. 프록시(corsproxy.io)를 거치도록 포장해줍니다!
+        const logoUrl = `https://corsproxy.io/?${encodeURIComponent(rawLogoUrl)}`;
         const benefitsList = (data.benefits && data.benefits.length > 0) ? data.benefits : ["특별 혜택 확인"];
         
         // 혜택 태그 생성 (클릭 수정 가능)
@@ -415,3 +418,144 @@ function fitTextToContainer() {
 }
 
 renderAll();
+
+// ============================================================
+// 📸 [추가] 카드 이미지 다운로드 기능 (단일 / 일괄)
+// ============================================================
+
+// [헬퍼 함수] 캡처 옵션 설정 (고화질 설정)
+const getCaptureOptions = (element) => ({
+    scale: 2, // 2배 해상도로 캡처 (선명하게)
+    backgroundColor: '#fcfaf7', // 배경색 지정 (투명 방지)
+    useCORS: true, // 외부 이미지(로고 등) 허용
+    logging: false, // 로그 끄기
+    // 현재 보이는 영역만 캡처하도록 설정
+    windowWidth: element.scrollWidth,
+    windowHeight: element.scrollHeight
+});
+
+// [기능 1] 단일 카드 다운로드 (현재 보이는 카드)
+async function downloadCurrentCard() {
+    // 현재 화면 중앙에 있는(translateX가 0%인) 카드를 찾습니다.
+    const currentCard = Array.from(document.querySelectorAll('.sale-card')).find(card => {
+        return card.style.transform === 'translateX(0%)' || card.style.transform === 'translateX(0)';
+    });
+
+    if (!currentCard) {
+        alert("캡처할 카드를 찾을 수 없습니다.");
+        return;
+    }
+
+    const btnText = document.getElementById('btn-download-single');
+    const originalText = btnText.innerHTML;
+    btnText.innerHTML = '⏳ 저장 중...'; // 버튼 텍스트 변경으로 피드백
+
+    try {
+        // html2canvas로 카드 영역을 캡처합니다.
+        const canvas = await html2canvas(currentCard, getCaptureOptions(currentCard));
+        
+        // 캡처된 이미지를 다운로드합니다.
+        const link = document.createElement('a');
+        // 파일명 설정: card_날짜시간.png
+        link.download = `card_${new Date().toISOString().slice(0,19).replace(/[:T]/g,'-')}.png`;
+        link.href = canvas.toDataURL('image/png');
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+    } catch (err) {
+        console.error("이미지 저장 실패:", err);
+        alert("이미지 저장 중 오류가 발생했습니다.");
+    } finally {
+        btnText.innerHTML = originalText; // 버튼 텍스트 복구
+    }
+}
+
+// [기능 2] 일괄 다운로드 (모든 카드를 압축해서 저장)
+async function downloadAllCards() {
+    const cards = document.querySelectorAll('.sale-card');
+    if (cards.length === 0) {
+        alert("저장할 카드가 없습니다.");
+        return;
+    }
+
+    if (!confirm(`총 ${cards.length}장의 카드를 이미지로 변환 후 압축하여 다운로드합니다.\n(시간이 다소 걸릴 수 있습니다.)`)) return;
+
+    const btnText = document.getElementById('btn-download-all');
+    const originalText = btnText.innerHTML;
+    btnText.innerHTML = '⏳ 변환 중... (0%)';
+
+    const zip = new JSZip(); 
+    const imgFolder = zip.folder("sale-cards_images"); 
+
+    // [핵심 해결 포인트 1] 원본 폰 화면(phone-wrapper)의 크기를 가져옵니다.
+    const phoneWrapper = document.querySelector('.phone-wrapper');
+
+    // [핵심 해결 포인트 2] 가짜 상자에 '높이(height)'를 추가하고, Y좌표 잘림 버그를 방지합니다.
+    const cloneContainer = document.createElement('div');
+    Object.assign(cloneContainer.style, {
+        position: 'fixed', 
+        top: '0',           // 화면 위쪽 밖(-9999px)으로 빼면 캡처가 잘리는 html2canvas 고질적 버그 방지
+        left: '-9999px',    // 대신 왼쪽 밖으로 숨김
+        width: phoneWrapper.offsetWidth + 'px',
+        height: phoneWrapper.offsetHeight + 'px', // 이제 위아래가 찌그러지지 않음!
+        backgroundColor: '#fcfaf7',
+        overflow: 'hidden'
+    });
+    document.body.appendChild(cloneContainer);
+
+    try {
+        for (let i = 0; i < cards.length; i++) {
+            btnText.innerHTML = `⏳ 변환 중... (${Math.round(((i + 1) / cards.length) * 100)}%)`;
+            
+            const card = cards[i];
+            const cardClone = card.cloneNode(true);
+            
+            // [핵심 해결 포인트 3] 복제된 카드가 가짜 상자 안에서 정중앙에 예쁘게 펴지도록 강제 설정
+            cardClone.style.transform = 'translateX(0%)'; 
+            cardClone.style.position = 'absolute';
+            cardClone.style.top = '0';
+            cardClone.style.left = '0';
+            cardClone.style.width = '100%';
+            cardClone.style.height = '100%';
+
+            cloneContainer.appendChild(cardClone);
+
+            // 캡처 옵션에 폰 화면의 크기를 명시적으로 알려줌
+            const captureOptions = {
+                scale: 2, 
+                backgroundColor: '#fcfaf7', 
+                useCORS: true, 
+                logging: false, 
+                width: phoneWrapper.offsetWidth,
+                height: phoneWrapper.offsetHeight
+            };
+
+            const canvas = await html2canvas(cardClone, captureOptions);
+            const imgData = canvas.toDataURL('image/png').split(',')[1]; 
+
+            const titleEl = card.querySelector('.main-title, .title');
+            let safeTitle = titleEl ? titleEl.innerText.replace(/[\/\\?%*:|"<>]/g, '_').trim() : 'card';
+            if (safeTitle.length > 15) safeTitle = safeTitle.substring(0, 15); 
+            
+            imgFolder.file(`${String(i + 1).padStart(2, '0')}_${safeTitle}.png`, imgData, {base64: true});
+            
+            cloneContainer.removeChild(cardClone); 
+        }
+
+        btnText.innerHTML = '📦 압축 중...';
+        const content = await zip.generateAsync({type:"blob"});
+        saveAs(content, `sale-cards_bundle_${new Date().toISOString().slice(0,10)}.zip`);
+
+    } catch (err) {
+        console.error("일괄 저장 실패:", err);
+        alert("일괄 저장 중 오류가 발생했습니다. 개발자 도구(F12) 콘솔을 확인해주세요.");
+    } finally {
+        document.body.removeChild(cloneContainer); // 작업 끝나면 가짜 상자 삭제
+        btnText.innerHTML = originalText; 
+    }
+}
+
+// 버튼 이벤트 리스너 등록
+document.getElementById('btn-download-single')?.addEventListener('click', downloadCurrentCard);
+document.getElementById('btn-download-all')?.addEventListener('click', downloadAllCards);

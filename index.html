@@ -21,14 +21,25 @@
         
         <div id="menu-overlay" class="menu-overlay"></div>
 
+        <div class="download-btn-group">
+            <button id="btn-download-single" title="현재 카드 이미지 저장">
+                ⤓
+            </button>
+            <button id="btn-download-all" title="모든 카드 이미지 일괄 저장 (ZIP)">
+            📂
+            </button>
+        </div>
+        
         <main id="card-container">
             </main>
 
-        <button id="menu-trigger" class="menu-btn">
-            <i class="fa-solid fa-bars"></i>
-        </button>
+            <button id="menu-trigger" class="menu-btn">
+                <i class="fa-solid fa-bars"></i>
+            </button>        
     </div>
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
