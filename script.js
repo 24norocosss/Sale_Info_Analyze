@@ -258,6 +258,7 @@ window.makeEditable = function(element, dataIndex, field, subIndex = null, subFi
 
 // [입력 검증] '국내/해외' 단어 체크 기능 포함
 // [수정] 데이터 생성 시 관리용 제목(menuTitle) 별도 저장
+// [최종] 디버깅 로그 출력 기능이 추가된 addPlatform 함수
 window.addPlatform = async function() {
     let apiMode = null;
     while (!apiMode) {
@@ -276,7 +277,9 @@ window.addPlatform = async function() {
     const url = prompt(apiMode === "overseas" ? "분석할 해외 브랜드 세일 페이지 URL을 입력하세요:" : "국내 기획전 URL을 입력하세요:");
     if (!url) return;
 
-    alert("분석을 시작합니다... (잠시만 기다려주세요)");
+    alert("분석을 시작합니다... (결과는 F12 콘솔에서도 확인 가능)");
+    console.log(`🚀 [Client] 분석 요청 시작: ${url}`);
+
     try {
         const response = await fetch('http://localhost:3000/scrape', {
             method: 'POST',
@@ -286,6 +289,26 @@ window.addPlatform = async function() {
         if (!response.ok) throw new Error("서버 응답 오류");
         const newData = await response.json();
         
+        // ★ [F12 디버깅] 서버에서 받은 로그를 콘솔에 예쁘게 출력
+        if (newData.debug_logs) {
+            console.groupCollapsed(`🗂️ [분석 리포트] ${newData.title || url}`);
+            
+            console.group("⏱️ Timeline (서버 작업 로그)");
+            newData.debug_logs.forEach(log => console.log(log));
+            console.groupEnd();
+
+            if (newData.debug_sources) {
+                console.group("🕵️ Extracted Sources (수집된 원본 데이터)");
+                console.log("📌 Meta Description:", newData.debug_sources.meta_description || "(없음)");
+                console.log("📄 Page Title:", newData.debug_sources.page_title || "(없음)");
+                console.log("🖼️ Image Alt Texts:", newData.debug_sources.alt_texts_preview || "(없음)");
+                console.groupEnd();
+            }
+
+            console.log("✅ Final Data:", newData);
+            console.groupEnd();
+        }
+
         if (!newData.benefits || newData.benefits.length === 0) {
             newData.benefits = ["특별 혜택 확인"];
         }
@@ -293,7 +316,6 @@ window.addPlatform = async function() {
             alert("⚠️ 제품 정보를 찾지 못했습니다. 국내 포맷으로 표시되거나 URL을 확인해주세요.");
         }
 
-        // [핵심] 관리용 제목(menuTitle)을 별도로 생성! (초기값은 제목과 동일)
         newData.menuTitle = newData.title; 
 
         saleData.push(newData);
@@ -302,7 +324,7 @@ window.addPlatform = async function() {
         renderAll();
     } catch (err) {
         console.error(err);
-        alert("분석 중 오류가 발생했습니다.");
+        alert("분석 중 오류가 발생했습니다. (F12 콘솔 확인)");
     }
 };
 
