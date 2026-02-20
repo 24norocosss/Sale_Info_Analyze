@@ -265,9 +265,9 @@ window.addPlatform = async function() {
         const modeInput = prompt("분석 모드를 입력하세요 (국내 / 해외):");
         if (modeInput === null) return;
         const trimmedInput = modeInput.trim();
-        if (trimmedInput.includes("해외") || trimmedInput.toLowerCase() === "oss") {
+        if (trimmedInput.includes("해외") || trimmedInput.toLowerCase() === "o") {
             apiMode = "overseas";
-        } else if (trimmedInput.includes("국내")) {
+        } else if (trimmedInput.includes("국내") || trimmedInput.toLowerCase() === "d") {
             apiMode = "domestic";
         } else {
             alert("⚠️ 입력 오류!\n'국내' 또는 '해외'라고 정확히 입력해주세요.");
