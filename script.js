@@ -95,9 +95,14 @@ function renderAll() {
     setTimeout(fitTextToContainer, 0);
 }
 // ... 사이드 메뉴 및 기타 함수들 ...
+// [수정] 사이드 메뉴: 관리용 제목 표시 + 파란색 수정 버튼 추가
 function updateSideMenu() {
     platformList.innerHTML = '';
+    
     saleData.forEach((data, index) => {
+        // 데이터 마이그레이션: 옛날 데이터에 menuTitle이 없으면 title로 채워줌
+        if (!data.menuTitle) data.menuTitle = data.title;
+
         const li = document.createElement('li');
         li.style.display = 'flex';
         li.style.justifyContent = 'space-between';
@@ -105,16 +110,39 @@ function updateSideMenu() {
         li.style.padding = '10px 0';
         li.style.borderBottom = '1px solid #eee';
 
+        // 1. 왼쪽 텍스트 (관리용 제목)
         const textSpan = document.createElement('span');
-        textSpan.innerText = data.title;
+        textSpan.innerText = data.menuTitle; // 이제 title 대신 menuTitle을 사용
         textSpan.style.cursor = 'pointer';
         textSpan.style.fontWeight = index === currentIndex ? 'bold' : 'normal';
+        textSpan.style.flex = '1'; // 남은 공간 차지
         textSpan.onclick = () => {
             currentIndex = index;
             closeMenu();
             renderAll();
         };
 
+        // 2. 버튼 그룹 (수정 + 삭제)
+        const btnGroup = document.createElement('div');
+        btnGroup.style.display = 'flex';
+        btnGroup.style.gap = '5px';
+
+        // [New] 파란색 제목 수정 버튼
+        const editBtn = document.createElement('button');
+        editBtn.innerHTML = '✏️'; // 펜 모양 아이콘
+        editBtn.style.cssText = 'background:#007bff; color:white; border:none; padding:5px 8px; border-radius:4px; cursor:pointer; font-size:12px;';
+        editBtn.onclick = (e) => {
+            e.stopPropagation(); // 메뉴 닫힘 방지
+            // 관리용 제목 수정 프롬프트
+            const newName = prompt("관리용 제목을 입력하세요:", data.menuTitle);
+            if (newName && newName.trim() !== "") {
+                saleData[index].menuTitle = newName.trim(); // 변수 분리: menuTitle만 수정됨
+                saveData();
+                updateSideMenu(); // 메뉴만 다시 그림 (카드는 영향 없음)
+            }
+        };
+
+        // 빨간색 삭제 버튼
         const delBtn = document.createElement('button');
         delBtn.innerText = '삭제';
         delBtn.style.cssText = 'background:#ff4d4d; color:white; border:none; padding:5px 10px; border-radius:4px; cursor:pointer; font-size:12px;';
@@ -123,8 +151,11 @@ function updateSideMenu() {
             deleteCard(index);
         };
 
+        btnGroup.appendChild(editBtn);
+        btnGroup.appendChild(delBtn);
+
         li.appendChild(textSpan);
-        li.appendChild(delBtn);
+        li.appendChild(btnGroup);
         platformList.appendChild(li);
     });
 }
@@ -210,16 +241,14 @@ window.makeEditable = function(element, dataIndex, field, subIndex = null, subFi
         }
 
         saveData();
-        if (field === 'title') updateSideMenu(); 
+        // [중요 변경점] 
+        // 예전에는 제목(title) 바꾸면 updateSideMenu()를 실행해서 목록도 같이 바꿨지만,
+        // 이제는 두 변수가 분리되었으므로, 카드 제목을 바꾼다고 목록을 다시 그릴 필요가 없음!
+        // if (field === 'title') updateSideMenu();  <-- 이 줄을 삭제함
     };
 
     element.onkeydown = function(e) {
-        // 1. Shift + Enter 누르면? -> 줄바꿈 허용 (이벤트 막지 않음)
-        if (e.key === 'Enter' && e.shiftKey) {
-            return; 
-        }
-
-        // 2. 그냥 Enter 누르면? -> 저장하고 나가기
+        if (e.key === 'Enter' && e.shiftKey) return; 
         if (e.key === 'Enter') {
             e.preventDefault();
             element.blur();
@@ -228,6 +257,7 @@ window.makeEditable = function(element, dataIndex, field, subIndex = null, subFi
 };
 
 // [입력 검증] '국내/해외' 단어 체크 기능 포함
+// [수정] 데이터 생성 시 관리용 제목(menuTitle) 별도 저장
 window.addPlatform = async function() {
     let apiMode = null;
     while (!apiMode) {
@@ -262,6 +292,10 @@ window.addPlatform = async function() {
         if (apiMode === "overseas" && (!newData.top_deals || newData.top_deals.length === 0)) {
             alert("⚠️ 제품 정보를 찾지 못했습니다. 국내 포맷으로 표시되거나 URL을 확인해주세요.");
         }
+
+        // [핵심] 관리용 제목(menuTitle)을 별도로 생성! (초기값은 제목과 동일)
+        newData.menuTitle = newData.title; 
+
         saleData.push(newData);
         currentIndex = saleData.length - 1;
         saveData();
